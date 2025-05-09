@@ -1,12 +1,24 @@
-'use-client'
+'use client'
 
 import { Button } from "@/components/button";
-import { CheckBox, Input, SelectInput } from "@/components/input";
+import Form from "@/components/form";
+import { CheckBox, InputField, InputIcon, InputRoot, SelectInput } from "@/components/input";
 import Modal from "@/components/modal";
-import { Eye, File, Heart, Star } from "lucide-react";
+import { MovieCard } from "@/components/movie-card";
+import { Eye, File, Heart, Search, Star } from "lucide-react";
 import { useState } from "react";
+
 export default function Home() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [modal, setModal] = useState(false);
+  const [notes, setNotes] = useState("");
+
+  const isSaveDisabled = notes.trim() === ""
+
+  const handleSave = () => {
+    console.log("Notas salvas:", notes);
+    setModal(false);
+  };
 
   return (
     <main>
@@ -20,7 +32,12 @@ export default function Home() {
       </div>
 
       <div className="py-4 px-8">
-        <Input placeholder="Search movies..." />
+        <InputRoot className="flex items-center">
+          <InputIcon>
+            <Search size={20} />
+          </InputIcon>
+          <InputField placeholder="Search" type="search" />
+        </InputRoot>
 
         <div className="flex flex-row items-center justify-between gap-4 py-6">
           <CheckBox value="synopsis" />
@@ -48,11 +65,31 @@ export default function Home() {
         </div>
 
         <div className="py-6">
-          <MovieCard />
+          <MovieCard
+            title={""}
+            year={0}
+            duration={0}
+            synopsis={""}
+            director={""}
+            producer={""}
+            showModal={() => setModal(true)}
+          />
         </div>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(true)} title="Modal title">Modal content</Modal>
+      <Modal
+        isOpen={modal}
+        onClose={() => {
+          setModal(false)
+          setNotes("")
+        }}
+        title={`Add Notes for 'title'`}
+        isSaveDisabled={isSaveDisabled}
+        onSave={handleSave}
+      >
+        <Form onChange={(newValue) => setNotes(newValue)} value={notes} />
+      </Modal>
+
     </main >
   );
 }

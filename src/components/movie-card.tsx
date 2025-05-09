@@ -1,9 +1,10 @@
-import { ChevronDown, ChevronUp, Eye, File, Heart, Star, StarIcon } from "lucide-react";
+"use client"
+
+import { ChevronDown, ChevronUp, Eye, File, Heart, StarIcon } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 import MovieImg from "../../public/story.png"
 import { Button } from "./button";
-import { useState } from "react";
-
 export interface MovieCardProps {
   title: string;
   year: number;
@@ -17,6 +18,10 @@ export interface MovieCardProps {
   watched?: boolean;
 }
 
+type MovieCardState = MovieCardProps & {
+  showModal: (modal: boolean) => void;
+}
+
 export function MovieCard({
   title,
   year,
@@ -25,8 +30,9 @@ export function MovieCard({
   score,
   synopsis,
   director,
-  producer
-}: MovieCardProps) {
+  producer,
+  showModal,
+}: MovieCardState) {
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -52,6 +58,7 @@ export function MovieCard({
 
       <Image src={MovieImg} alt={'cover'} width={320} height={400} />
 
+      {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
       <label className="font-medium text-lg">{title}</label>
       <p className="text-sm text-gray-500">{year} • {duration}</p>
 
@@ -67,6 +74,7 @@ export function MovieCard({
           <div className="flex flex-row gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
               <StarIcon
+                key={star}
                 size={12}
                 color={star <= rating ? '#FFC222' : '#C4C4C4'}
                 fill={star <= rating ? '#FFC222' : 'none'}
@@ -147,7 +155,10 @@ export function MovieCard({
           </Button>
         }
 
-        <Button className="w-full border border-gray-400">
+        <Button
+          className="w-full border border-gray-400"
+          onClick={() => showModal(true)}
+        >
           <File size={18} />
           Add Note
         </Button>

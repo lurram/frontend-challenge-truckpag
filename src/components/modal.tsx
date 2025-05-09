@@ -1,4 +1,7 @@
-import { useEffect, ReactNode } from 'react';
+"use client"
+
+import clsx from 'clsx';
+import { type ReactNode, useEffect } from 'react';
 import { Button } from './button';
 
 type ModalProps = {
@@ -7,6 +10,8 @@ type ModalProps = {
   children: ReactNode;
   title?: string;
   closeOnOutsideClick?: boolean;
+  isSaveDisabled?: boolean;
+  onSave?: () => void;
 };
 
 export default function Modal({
@@ -15,9 +20,11 @@ export default function Modal({
   children,
   title,
   closeOnOutsideClick = true,
+  isSaveDisabled = true,
+  onSave,
 }: ModalProps) {
 
-  // Close modal on ESC
+  // Close modal on ESC and handle body overflow
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -26,10 +33,16 @@ export default function Modal({
     };
 
     if (isOpen) {
+      // Disable scroll
+      document.body.style.overflow = 'hidden';
       window.addEventListener('keydown', handleEsc);
+    } else {
+      // Enable scroll
+      document.body.style.overflow = 'auto';
     }
 
     return () => {
+      document.body.style.overflow = 'auto';
       window.removeEventListener('keydown', handleEsc);
     };
   }, [isOpen, onClose]);
@@ -37,11 +50,12 @@ export default function Modal({
   if (!isOpen) return null;
 
   return (
-    <div className="inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-full items-center justify-center p-4 text-center">
         {/* Overlay */}
+        {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
         <div
-          className="inset-0 transition-opacity"
+          className="fixed inset-0 transition-opacity"
           aria-hidden="true"
           onClick={closeOnOutsideClick ? onClose : undefined}
         >
@@ -50,11 +64,11 @@ export default function Modal({
 
         {/* Modal */}
         <div
-          className="relative mx-auto w-full max-w-lg transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all focus:outline-none"
+          className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-md"
         >
           {/* Header */}
           {title && (
-            <div className="bg-white px-4 py-3 sm:px-6">
+            <div className="bg-white px-4 pt-3">
               <h3
                 className="text-lg font-medium leading-6 text-gray-900"
               >
@@ -64,15 +78,29 @@ export default function Modal({
           )}
 
           {/* Conteúdo */}
-          <div className="px-4 py-5 sm:p-6">{children}</div>
+          <div className="p-4 sm:p-6">{children}</div>
 
           {/* Footer (opcional) */}
-          <div className="bg-white px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+          <div className="bg-gray-50 gap-2 px-4 py-3 flex flex-row-reverse sm:px-6">
             <Button
+              type='button'
               onClick={onClose}
             >
               Fechar
             </Button>
+
+            <Button
+              type="button"
+              onClick={onSave}
+              disabled={isSaveDisabled}
+              className={clsx(
+                isSaveDisabled && "bg-black text-white hover:bg-black/70 opacity-50 cursor-not-allowed",
+                !isSaveDisabled && "bg-black text-white hover:bg-black/70"
+              )}
+            >
+              Salvar
+            </Button>
+
           </div>
         </div>
       </div>
